@@ -1,0 +1,12 @@
+[
+  {"id": "road", "enemy": "mossback", "gold": [18, 28]},
+  {"id": "shrine", "enemy": "fanatic", "gold": [20, 30]},
+  {"id": "alley", "enemy": "cutpurse", "gold": [22, 34]},
+  {
+    "id": "gate",
+    "enemy": "gate_warden",
+    "boss": true,
+    "shop_before": true,
+    "gold": [90, 90]
+  }
+]

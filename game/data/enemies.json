@@ -1,0 +1,52 @@
+[
+  {
+    "id": "mossback",
+    "name": "Mossback",
+    "hp": 34,
+    "color": [96, 138, 84],
+    "intro": "A damp brute blocks the road.",
+    "pattern": [
+      {"intent": "attack", "damage": 7},
+      {"intent": "attack", "damage": 4, "times": 2},
+      {"intent": "defend", "block": 8}
+    ]
+  },
+  {
+    "id": "fanatic",
+    "name": "Fanatic",
+    "hp": 42,
+    "color": [168, 96, 72],
+    "intro": "The fanatic begins a low chant.",
+    "pattern": [
+      {"intent": "buff", "status": "strength", "amount": 2},
+      {"intent": "attack", "damage": 6},
+      {"intent": "attack", "damage": 9}
+    ]
+  },
+  {
+    "id": "cutpurse",
+    "name": "Cutpurse",
+    "hp": 30,
+    "color": [120, 108, 168],
+    "intro": "A knife flashes in the alley.",
+    "pattern": [
+      {"intent": "attack", "damage": 11},
+      {"intent": "attack_debuff", "damage": 5, "status": "weak", "amount": 2},
+      {"intent": "defend", "block": 6}
+    ]
+  },
+  {
+    "id": "gate_warden",
+    "name": "Gate Warden",
+    "hp": 78,
+    "color": [176, 148, 72],
+    "intro": "The warden lowers a great shield.",
+    "pattern": [
+      {"intent": "attack", "damage": 12},
+      {"intent": "defend", "block": 14},
+      {"intent": "attack", "damage": 7, "times": 2},
+      {"intent": "debuff", "status": "vulnerable", "amount": 2},
+      {"intent": "attack", "damage": 16}
+    ]
+  }
+]

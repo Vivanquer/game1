@@ -1,0 +1,16 @@
+Drop PNG files here, then rebuild with BuildGame.exe.
+
+Cards
+  game/assets/cards/strike.png
+  or a frame sequence: game/assets/cards/strike/00.png, 01.png, ...
+  Frames are sorted by filename and played at 8 fps.
+  A single image is used as a still.
+
+Enemies
+  game/assets/enemies/mossback.png
+  or game/assets/enemies/mossback/00.png, 01.png, ...
+
+The id must match the id in the JSON files.
+If a picture is missing, the game draws a placeholder.
+
+Audio files can go in game/assets/audio later. Nothing reads them yet.

@@ -1,0 +1,12 @@
+{
+  "hand_size": 5,
+  "hand_limit": 10,
+  "shop_slots": 5,
+  "card_price": 55,
+  "remove_price": 75,
+  "heal_price": 40,
+  "heal_amount": 15,
+  "min_deck_size": 5,
+  "weak_multiplier": 0.75,
+  "vulnerable_multiplier": 1.5
+}

@@ -1,0 +1,20 @@
+{
+  "name": "Wayfarer",
+  "title": "Wayfarer",
+  "subtitle": "A card RPG",
+  "hp": 70,
+  "gold": 45,
+  "energy": 3,
+  "cards": [
+    "strike",
+    "strike",
+    "strike",
+    "strike",
+    "strike",
+    "guard",
+    "guard",
+    "guard",
+    "guard",
+    "crush"
+  ]
+}

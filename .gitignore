@@ -1,0 +1,11 @@
+.venv/
+__pycache__/
+**/__pycache__/
+build/
+dist/
+*.spec
+versions/
+*.exe
+error.log
+smoke_result.txt
+boot_ok.txt
