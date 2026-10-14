@@ -1,1 +1,1 @@
-"""Wayfarer card RPG."""
+"""Beastbound Arena."""

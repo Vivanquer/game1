@@ -26,26 +26,13 @@ HP_BG = (62, 32, 40)
 BLOCK = (86, 156, 214)
 ENERGY = (88, 196, 122)
 HEAL = (88, 196, 122)
+CAPTURE = (182, 112, 210)
 
 TYPE_COLORS = {
-    "attack": (176, 72, 72),
-    "skill": (58, 120, 184),
-    "power": (186, 146, 62),
-}
-
-INTENT_COLORS = {
-    "attack": (196, 82, 78),
-    "defend": (86, 156, 214),
-    "buff": (186, 146, 62),
-    "debuff": (164, 112, 196),
-    "unknown": (140, 140, 150),
-}
-
-STATUS_COLORS = {
-    "strength": (214, 132, 72),
-    "dexterity": (72, 176, 168),
-    "weak": (140, 160, 96),
-    "vulnerable": (176, 112, 196),
+    "strike": (190, 76, 70),
+    "defend": (72, 138, 202),
+    "heal": (78, 174, 106),
+    "trap": (174, 102, 202),
 }
 
 
@@ -59,12 +46,8 @@ def _rules() -> dict:
 _RULES = _rules()
 
 HAND_SIZE = int(_RULES.get("hand_size", 5))
-HAND_LIMIT = int(_RULES.get("hand_limit", 10))
-SHOP_SLOTS = int(_RULES.get("shop_slots", 5))
-CARD_PRICE = int(_RULES.get("card_price", 55))
-REMOVE_PRICE = int(_RULES.get("remove_price", 75))
-HEAL_PRICE = int(_RULES.get("heal_price", 40))
-HEAL_AMOUNT = int(_RULES.get("heal_amount", 15))
-MIN_DECK = int(_RULES.get("min_deck_size", 5))
-WEAK_MULT = float(_RULES.get("weak_multiplier", 0.75))
-VULN_MULT = float(_RULES.get("vulnerable_multiplier", 1.5))
+ACTION_DECK_SIZE = int(_RULES.get("action_deck_size", 20))
+PARTY_LIMIT = int(_RULES.get("party_limit", 3))
+CAPTURE_RATIO = float(_RULES.get("capture_ratio", 0.4))
+XP_ATTACK = int(_RULES.get("xp_attack", 2))
+XP_HP = int(_RULES.get("xp_hp", 3))

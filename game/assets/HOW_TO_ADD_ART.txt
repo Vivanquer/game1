@@ -1,16 +1,21 @@
 Drop PNG files here, then rebuild with BuildGame.exe.
 
-Cards
-  game/assets/cards/strike.png
-  or a frame sequence: game/assets/cards/strike/00.png, 01.png, ...
+Actions
+  game/assets/actions/strike.png
+  or a frame sequence: game/assets/actions/strike/00.png, 01.png, ...
   Frames are sorted by filename and played at 8 fps.
   A single image is used as a still.
 
-Enemies
-  game/assets/enemies/mossback.png
-  or game/assets/enemies/mossback/00.png, 01.png, ...
+Monsters
+  game/assets/monsters/ember_fox.png
+  or game/assets/monsters/ember_fox/00.png, 01.png, ...
 
 The id must match the id in the JSON files.
 If a picture is missing, the game draws a placeholder.
+
+Menu backdrop
+  game/assets/ui/menu_bg.png
+  A wide 16:9 painting. The title screen shows it bright.
+  Fights use the same painting with a warm shade so the panels stay readable.
 
 Audio files can go in game/assets/audio later. Nothing reads them yet.

@@ -36,7 +36,7 @@ def find_root() -> Path:
             if candidate in seen:
                 continue
             seen.add(candidate)
-            if (candidate / "run_game.py").is_file() and (candidate / "game" / "data" / "cards.json").is_file():
+            if (candidate / "run_game.py").is_file() and (candidate / "game" / "data" / "actions.json").is_file():
                 return candidate
     raise BuildError("Could not find the game project. Keep BuildGame.exe next to run_game.py.")
 
@@ -63,16 +63,64 @@ def find_python(root: Path) -> str:
 
 def exe_stem(root: Path) -> str:
     hero = json.loads((root / "game" / "data" / "hero.json").read_text(encoding="utf-8"))
-    raw = str(hero.get("title") or "Wayfarer")
+    raw = str(hero.get("title") or "Beastbound Arena")
     safe = re.sub(r"[^A-Za-z0-9]+", "", raw)
-    return safe or "Wayfarer"
+    return safe or "BeastboundArena"
 
 
 def next_version(root: Path) -> str:
-    number = 1
-    while (root / "versions" / f"v{number}").exists():
-        number += 1
-    return f"v{number}"
+    """Next label for the current stage.
+
+    Development counts 0.0.1, 0.0.2, 0.0.3, and so on.
+    Alpha starts at 0.1.0. Open beta starts at 1.0.0.
+    Later updates in those stages add one to the last number.
+    """
+    stage = _version_stage(root)
+    major, minor, first = _STAGE_LINES[stage]
+    highest = first - 1
+    pattern = re.compile(rf"^{major}\.{minor}\.(\d+)$")
+    versions_dir = root / "versions"
+    if versions_dir.is_dir():
+        for child in versions_dir.iterdir():
+            match = pattern.fullmatch(child.name)
+            if match:
+                highest = max(highest, int(match.group(1)))
+    return f"{major}.{minor}.{highest + 1}"
+
+
+_STAGE_LINES = {
+    "development": (0, 0, 1),
+    "alpha": (0, 1, 0),
+    "beta": (1, 0, 0),
+}
+
+
+def _version_stage(root: Path) -> str:
+    path = root / "game" / "data" / "version.json"
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError, TypeError):
+        return "development"
+    if not isinstance(data, dict):
+        return "development"
+    stage = str(data.get("stage", "development")).strip().lower().replace("_", " ")
+    if stage in ("open beta", "open-beta"):
+        return "beta"
+    return stage if stage in _STAGE_LINES else "development"
+
+
+def remember_version(root: Path, version: str) -> None:
+    path = root / "game" / "data" / "version.json"
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError, TypeError):
+        data = {}
+    if not isinstance(data, dict):
+        data = {}
+    data["name"] = version
+    stage = str(data.get("stage", "")).strip()
+    data["stage"] = stage or "development"
+    path.write_text(json.dumps(data, indent=2) + "\n", encoding="utf-8")
 
 
 def ensure_build_tools(python: str, root: Path, log) -> None:
@@ -97,7 +145,7 @@ def ensure_build_tools(python: str, root: Path, log) -> None:
 
 
 def run_smoke(python: str, root: Path, log) -> None:
-    log("Checking cards, enemies, and combat rules...")
+    log("Checking actions, monsters, and arena rules...")
     result = subprocess.run(
         [python, "run_game.py", "--smoke"],
         cwd=root,
@@ -119,7 +167,17 @@ def stage_data(root: Path, version: str) -> Path:
     if staging.exists():
         shutil.rmtree(staging)
     shutil.copytree(root / "game" / "data", staging)
-    payload = {"name": version, "built": datetime.now().isoformat(timespec="seconds")}
+    try:
+        current = json.loads((root / "game" / "data" / "version.json").read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError, TypeError):
+        current = {}
+    if not isinstance(current, dict):
+        current = {}
+    payload = {
+        "name": version,
+        "stage": current.get("stage", "development"),
+        "built": datetime.now().isoformat(timespec="seconds"),
+    }
     (staging / "version.json").write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
     return staging
 
@@ -206,6 +264,7 @@ def build_version(version: str, log, force: bool = False) -> Path:
         encoding="utf-8",
     )
     log(f"Built {exe_path}")
+    remember_version(root, version)
     return exe_path
 
 
@@ -256,7 +315,7 @@ def launch_gui() -> None:
 
     root_dir = find_root()
     window = tk.Tk()
-    window.title("Wayfarer version builder")
+    window.title("Beastbound Arena version builder")
     window.geometry("720x520")
     window.minsize(640, 420)
 
@@ -265,13 +324,13 @@ def launch_gui() -> None:
     ttk.Label(header, text="Build a standalone game exe", font=("Segoe UI", 16, "bold")).pack(anchor="w")
     ttk.Label(
         header,
-        text="Each name becomes its own exe under versions\\. Earlier versions stay where they are.",
+        text="Each update gets the next number under versions\\. Development is 0.0.1, 0.0.2, and so on.",
         wraplength=680,
     ).pack(anchor="w", pady=(4, 0))
 
     form = ttk.Frame(window, padding=(12, 0, 12, 8))
     form.pack(fill="x")
-    ttk.Label(form, text="Version name").pack(side="left")
+    ttk.Label(form, text="Version").pack(side="left")
     version_var = tk.StringVar(value=next_version(root_dir))
     entry = ttk.Entry(form, textvariable=version_var, width=24)
     entry.pack(side="left", padx=8)
@@ -330,7 +389,7 @@ def launch_gui() -> None:
         if not VERSION_RE.match(version):
             messagebox.showerror(
                 "Version name",
-                "Use letters, numbers, dots, dashes, or underscores. For example v2 or v0.3-shop.",
+                "Use letters, numbers, dots, dashes, or underscores. For example 0.0.2.",
             )
             return
         exe_path = root_dir / "versions" / version / f"{exe_stem(root_dir)}.exe"

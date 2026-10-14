@@ -1,0 +1,35 @@
+[
+  {"id": "t1_ember_1", "monster": "ember_fox", "tier": 1},
+  {"id": "t1_moss_1", "monster": "moss_pup", "tier": 1},
+  {"id": "t1_tide_1", "monster": "tide_finch", "tier": 1},
+  {"id": "t1_stone_1", "monster": "stone_cub", "tier": 1},
+  {"id": "t1_spark_1", "monster": "spark_hare", "tier": 1},
+  {"id": "t1_ember_2", "monster": "ember_fox", "tier": 1, "hp_bonus": 1},
+  {"id": "t1_moss_2", "monster": "moss_pup", "tier": 1, "hp_bonus": 1},
+  {"id": "t1_tide_2", "monster": "tide_finch", "tier": 1, "attack_bonus": 1},
+  {"id": "t1_stone_2", "monster": "stone_cub", "tier": 1, "attack_bonus": 1},
+  {"id": "t1_spark_2", "monster": "spark_hare", "tier": 1, "hp_bonus": 1},
+
+  {"id": "t2_ember_1", "monster": "ember_fox", "tier": 2, "hp_bonus": 7, "attack_bonus": 2, "defense_bonus": 1},
+  {"id": "t2_moss_1", "monster": "moss_pup", "tier": 2, "hp_bonus": 7, "attack_bonus": 2, "defense_bonus": 1},
+  {"id": "t2_tide_1", "monster": "tide_finch", "tier": 2, "hp_bonus": 8, "attack_bonus": 3, "defense_bonus": 1},
+  {"id": "t2_stone_1", "monster": "stone_cub", "tier": 2, "hp_bonus": 7, "attack_bonus": 2, "defense_bonus": 1},
+  {"id": "t2_spark_1", "monster": "spark_hare", "tier": 2, "hp_bonus": 7, "attack_bonus": 3, "defense_bonus": 1},
+  {"id": "t2_ember_2", "monster": "ember_fox", "tier": 2, "hp_bonus": 9, "attack_bonus": 3, "defense_bonus": 1},
+  {"id": "t2_moss_2", "monster": "moss_pup", "tier": 2, "hp_bonus": 9, "attack_bonus": 3, "defense_bonus": 2},
+  {"id": "t2_tide_2", "monster": "tide_finch", "tier": 2, "hp_bonus": 9, "attack_bonus": 3, "defense_bonus": 2},
+  {"id": "t2_stone_2", "monster": "stone_cub", "tier": 2, "hp_bonus": 9, "attack_bonus": 3, "defense_bonus": 2},
+  {"id": "t2_spark_2", "monster": "spark_hare", "tier": 2, "hp_bonus": 9, "attack_bonus": 4, "defense_bonus": 1},
+
+  {"id": "t3_gloom", "monster": "gloom_moth", "tier": 3},
+  {"id": "t3_boar", "monster": "razor_boar", "tier": 3},
+  {"id": "t3_toad", "monster": "crystal_toad", "tier": 3},
+  {"id": "t3_serpent", "monster": "dune_serpent", "tier": 3},
+  {"id": "t3_elk", "monster": "frost_elk", "tier": 3},
+  {"id": "t3_wyvern", "monster": "iron_wyvern", "tier": 3},
+  {"id": "t3_lynx", "monster": "void_lynx", "tier": 3},
+  {"id": "t3_sunscale", "monster": "sunscale", "tier": 3},
+  {"id": "t3_owl", "monster": "grave_owl", "tier": 3},
+
+  {"id": "apex", "monster": "apex_chimera", "tier": 4, "boss": true}
+]

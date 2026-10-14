@@ -20,7 +20,6 @@ from game.settings import (
     MUTED,
     PANEL,
     PANEL_EDGE,
-    STATUS_COLORS,
     TEXT,
     TYPE_COLORS,
     WIDTH,
@@ -53,11 +52,13 @@ class Art:
         folder = assets_dir() / kind / ident
         paths: list[Path] = []
         if folder.is_dir():
-            paths = sorted(folder.glob("*.png"))
+            paths = sorted(folder.glob("*.png")) or sorted(folder.glob("*.jpg"))
         if not paths:
-            single = assets_dir() / kind / f"{ident}.png"
-            if single.exists():
-                paths = [single]
+            for ext in (".png", ".jpg", ".jpeg"):
+                single = assets_dir() / kind / f"{ident}{ext}"
+                if single.exists():
+                    paths = [single]
+                    break
         for path in paths:
             image = pygame.image.load(path)
             try:
@@ -76,10 +77,42 @@ class Art:
         return frames[index]
 
 
-def draw_background(surf: pygame.Surface) -> None:
-    surf.fill(BG)
-    pygame.draw.rect(surf, BG_TOP, (0, 0, WIDTH, 56))
-    pygame.draw.line(surf, PANEL_EDGE, (0, 56), (WIDTH, 56), 1)
+_BACKDROP: dict = {"ready": False, "image": None}
+
+
+def backdrop() -> pygame.Surface | None:
+    if not _BACKDROP["ready"]:
+        _BACKDROP["ready"] = True
+        path = assets_dir() / "ui" / "menu_bg.png"
+        if path.exists():
+            image = pygame.image.load(path)
+            try:
+                image = image.convert()
+            except pygame.error:
+                pass
+            _BACKDROP["image"] = pygame.transform.smoothscale(image, (WIDTH, HEIGHT))
+    return _BACKDROP["image"]
+
+
+def draw_background(surf: pygame.Surface, shade: int = 88, hud: bool = True) -> None:
+    image = backdrop()
+    if image is None:
+        surf.fill(BG)
+        for index in range(12):
+            blend = index / 11
+            color = tuple(int(BG_TOP[channel] * (1 - blend) + BG[channel] * blend) for channel in range(3))
+            pygame.draw.rect(surf, color, (0, 56 + index * 56, WIDTH, 57))
+    else:
+        surf.blit(image, (0, 0))
+        if shade:
+            veil = pygame.Surface((WIDTH, HEIGHT), pygame.SRCALPHA)
+            veil.fill((36, 18, 8, shade))
+            surf.blit(veil, (0, 0))
+    if hud:
+        bar = pygame.Surface((WIDTH, 56), pygame.SRCALPHA)
+        bar.fill((28, 16, 10, 168))
+        surf.blit(bar, (0, 0))
+        pygame.draw.line(surf, (214, 168, 92), (0, 56), (WIDTH, 56), 2)
 
 
 def blit_text(surf, text, font, color, pos) -> pygame.Rect:
@@ -124,16 +157,30 @@ def wrap_text(text: str, font, width: int) -> list[str]:
 
 
 def draw_panel(surf, rect: pygame.Rect, fill=PANEL, edge=PANEL_EDGE) -> None:
+    shadow = rect.move(0, 5)
+    pygame.draw.rect(surf, (9, 11, 19), shadow, border_radius=12)
     pygame.draw.rect(surf, fill, rect, border_radius=12)
     pygame.draw.rect(surf, edge, rect, width=2, border_radius=12)
 
 
-def draw_button(surf, rect, label, font, mouse, enabled=True, primary=False) -> None:
+def draw_button(surf, rect, label, font, mouse, enabled=True, primary=False, warm=False, danger=False) -> None:
     hovered = enabled and rect.collidepoint(mouse)
     if not enabled:
-        fill = (42, 44, 58)
-        edge = (70, 72, 88)
-        color = (120, 122, 136)
+        fill = (92, 78, 64) if warm else (42, 44, 58)
+        edge = (140, 116, 88) if warm else (70, 72, 88)
+        color = (186, 168, 146) if warm else (120, 122, 136)
+    elif danger:
+        fill = (168, 64, 58) if hovered else (132, 48, 46)
+        edge = (230, 150, 140)
+        color = TEXT
+    elif warm and primary:
+        fill = (214, 128, 62) if hovered else (186, 104, 48)
+        edge = (255, 220, 150)
+        color = (48, 24, 12)
+    elif warm:
+        fill = (122, 74, 46) if hovered else (96, 58, 36)
+        edge = (228, 186, 120)
+        color = (255, 240, 214)
     elif primary:
         fill = (78, 118, 86) if not hovered else (92, 140, 102)
         edge = (150, 196, 150)
@@ -142,9 +189,21 @@ def draw_button(surf, rect, label, font, mouse, enabled=True, primary=False) -> 
         fill = (48, 54, 78) if not hovered else (62, 70, 102)
         edge = PANEL_EDGE if not hovered else (160, 170, 210)
         color = TEXT
-    pygame.draw.rect(surf, fill, rect, border_radius=10)
-    pygame.draw.rect(surf, edge, rect, width=2, border_radius=10)
+    shadow = rect.move(0, 3)
+    pygame.draw.rect(surf, (40, 22, 12) if warm else (9, 11, 19), shadow, border_radius=12)
+    pygame.draw.rect(surf, fill, rect, border_radius=12)
+    pygame.draw.rect(surf, edge, rect, width=2, border_radius=12)
     blit_center(surf, label, font, color, rect.center)
+
+
+def draw_parchment(surf, rect: pygame.Rect) -> None:
+    shadow = rect.move(0, 8)
+    pygame.draw.rect(surf, (48, 26, 12), shadow, border_radius=22)
+    body = pygame.Surface((rect.w, rect.h), pygame.SRCALPHA)
+    pygame.draw.rect(body, (255, 236, 204, 236), body.get_rect(), border_radius=22)
+    pygame.draw.rect(body, (122, 72, 36, 255), body.get_rect(), width=4, border_radius=22)
+    pygame.draw.rect(body, (214, 168, 92, 255), body.get_rect().inflate(-10, -10), width=2, border_radius=16)
+    surf.blit(body, rect.topleft)
 
 
 def draw_bar(surf, rect, fraction, fill, back=HP_BG) -> None:
@@ -156,16 +215,44 @@ def draw_bar(surf, rect, fraction, fill, back=HP_BG) -> None:
         pygame.draw.rect(surf, fill, inner, border_radius=6)
 
 
+def draw_marked_bar(
+    surf,
+    rect: pygame.Rect,
+    current: float,
+    maximum: int,
+    preview: float | None,
+    zone: tuple[int, int] | None,
+    fill,
+    zone_color,
+    marker_color,
+) -> None:
+    """Health bar with the chunk that will be lost, plus a capture-zone bracket."""
+    maximum = max(1, maximum)
+    current = max(0.0, min(float(maximum), current))
+    pygame.draw.rect(surf, HP_BG, rect, border_radius=7)
+    fill_w = int(rect.w * current / maximum)
+    if fill_w:
+        pygame.draw.rect(surf, fill, pygame.Rect(rect.x, rect.y, fill_w, rect.h), border_radius=7)
+    if preview is not None and preview < current - 0.05:
+        preview = max(0.0, preview)
+        mark = rect.x + int(rect.w * preview / maximum)
+        lost = pygame.Rect(mark, rect.y, max(0, rect.x + fill_w - mark), rect.h)
+        pygame.draw.rect(surf, marker_color, lost)
+        pygame.draw.polygon(surf, marker_color, [(mark, rect.y - 7), (mark - 6, rect.y - 14), (mark + 6, rect.y - 14)])
+    pygame.draw.rect(surf, (24, 18, 24), rect, width=2, border_radius=7)
+    if zone is not None:
+        low, high = zone
+        left = rect.x + int(rect.w * low / maximum)
+        right = rect.x + int(rect.w * min(maximum, high) / maximum)
+        mid = (left + max(left + 8, right)) // 2
+        y = rect.bottom + 6
+        pygame.draw.line(surf, zone_color, (left, y), (max(left + 8, right), y), 4)
+        pygame.draw.polygon(surf, zone_color, [(mid, rect.bottom + 1), (mid - 6, y + 7), (mid + 6, y + 7)])
+
+
 def status_entries(actor) -> list[tuple[str, tuple[int, int, int]]]:
-    order = ["strength", "dexterity", "weak", "vulnerable"]
-    names = [name for name in order if actor.statuses.get(name, 0)]
-    names.extend(name for name in actor.statuses if name not in order and actor.statuses[name])
-    entries = []
-    for name in names:
-        amount = actor.statuses[name]
-        label = f"{name.title()} {amount}"
-        entries.append((label, STATUS_COLORS.get(name, MUTED)))
-    return entries
+    del actor
+    return []
 
 
 def draw_pills(surf, entries, origin, font, max_width) -> int:
@@ -183,6 +270,21 @@ def draw_pills(surf, entries, origin, font, max_width) -> int:
         surf.blit(text, (x + pad, y + 2))
         x += width + 6
     return y + (row_h if entries else 0)
+
+
+def blit_portrait(surf, image, rect: pygame.Rect, ring=(224, 184, 84)) -> None:
+    """Circle-crop a creature icon so the painted wash reads as a badge."""
+    size = max(8, min(rect.w, rect.h))
+    scaled = pygame.transform.smoothscale(image, (size, size)).convert_alpha()
+    badge = pygame.Surface((size, size), pygame.SRCALPHA)
+    badge.blit(scaled, (0, 0))
+    mask = pygame.Surface((size, size), pygame.SRCALPHA)
+    pygame.draw.circle(mask, (255, 255, 255, 255), (size // 2, size // 2), size // 2 - 2)
+    badge.blit(mask, (0, 0), special_flags=pygame.BLEND_RGBA_MULT)
+    dest = badge.get_rect(center=rect.center)
+    surf.blit(badge, dest)
+    pygame.draw.circle(surf, (48, 26, 12), dest.center, size // 2 - 1, 5)
+    pygame.draw.circle(surf, ring, dest.center, size // 2 - 1, 3)
 
 
 def blit_fit(surf, image, rect: pygame.Rect) -> None:
@@ -254,8 +356,9 @@ def draw_card(surf, card, rect: pygame.Rect, fonts: Fonts, art: Art, time: float
         name = name[:-1]
     blit_text(surf, name, name_font, TEXT, (rect.x + 28, rect.y + 14))
 
-    art_rect = pygame.Rect(rect.x + 14, rect.y + 40, rect.w - 28, max(24, int(rect.h * 0.34)))
-    image = art.frame("cards", card.id, time)
+    art_h = 34 if rect.h < 180 else max(24, int(rect.h * 0.34))
+    art_rect = pygame.Rect(rect.x + 14, rect.y + 36, rect.w - 28, art_h)
+    image = art.frame("actions", card.id, time)
     if image is not None:
         blit_fit(surf, image, art_rect)
     else:
@@ -277,7 +380,8 @@ def draw_card(surf, card, rect: pygame.Rect, fonts: Fonts, art: Art, time: float
     pygame.draw.circle(surf, (18, 20, 30), cost_center, 13)
     pygame.draw.circle(surf, color, cost_center, 13, 2)
     cost_color = (220, 90, 90) if disabled else TEXT
-    blit_center(surf, str(card.cost), fonts.sm, cost_color, cost_center)
+    value = getattr(card, "value", 0)
+    blit_center(surf, str(value) if value else "•", fonts.sm, cost_color, cost_center)
 
     if disabled and not hover:
         shade = pygame.Surface((rect.w, rect.h), pygame.SRCALPHA)
@@ -306,7 +410,7 @@ def draw_top_bar(surf, fonts: Fonts, left: str, center: str, right: str) -> None
     blit_text(surf, left, fonts.bold, TEXT, (64, 16))
     blit_center(surf, center, fonts.md, TEXT, (WIDTH // 2, 28))
     image = fonts.md.render(right, True, GOLD)
-    surf.blit(image, (WIDTH - 24 - image.get_width(), 16))
+    surf.blit(image, (WIDTH - 76 - image.get_width(), 16))
 
 
 def draw_menu_button(surf, rect: pygame.Rect, mouse, opened: bool) -> None:

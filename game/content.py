@@ -1,4 +1,4 @@
-"""Load cards, enemies, encounters, and the hero from JSON."""
+"""Load and validate the data-driven arena content."""
 
 from __future__ import annotations
 
@@ -7,37 +7,8 @@ from functools import lru_cache
 
 from game.paths import data_dir
 
-KNOWN_OPS = {
-    "damage",
-    "block",
-    "draw",
-    "apply",
-    "status_self",
-    "energy",
-    "lose_hp",
-    "heal",
-    "damage_heal",
-    "copy_to_discard",
-    "double_strength",
-    "barricade",
-    "turn_start",
-    "if_intent_attack",
-}
-
-KNOWN_INTENTS = {"attack", "defend", "buff", "debuff", "attack_debuff"}
-TIMED_STATUSES = {"weak", "vulnerable"}
-REQUIRED_FIELDS = {
-    "damage": ("amount",),
-    "block": ("amount",),
-    "draw": ("amount",),
-    "apply": ("status", "amount"),
-    "status_self": ("status", "amount"),
-    "energy": ("amount",),
-    "lose_hp": ("amount",),
-    "heal": ("amount",),
-    "damage_heal": ("amount",),
-    "turn_start": ("effect",),
-}
+ACTION_TYPES = {"strike", "defend", "heal", "trap"}
+ABILITY_TYPES = {"party_attack", "party_defense", "draw_bonus", "turn_heal", "pierce", "rage"}
 
 
 def _load(name: str):
@@ -46,18 +17,18 @@ def _load(name: str):
 
 
 @lru_cache(maxsize=1)
-def load_cards() -> tuple[dict, ...]:
-    return tuple(_load("cards.json"))
+def load_actions() -> tuple[dict, ...]:
+    return tuple(_load("actions.json"))
 
 
 @lru_cache(maxsize=1)
-def load_enemies() -> tuple[dict, ...]:
-    return tuple(_load("enemies.json"))
+def load_monsters() -> tuple[dict, ...]:
+    return tuple(_load("monsters.json"))
 
 
 @lru_cache(maxsize=1)
-def load_encounters() -> tuple[dict, ...]:
-    return tuple(_load("encounters.json"))
+def load_gauntlet() -> tuple[dict, ...]:
+    return tuple(_load("gauntlet.json"))
 
 
 @lru_cache(maxsize=1)
@@ -68,104 +39,116 @@ def load_hero() -> dict:
 def game_version() -> str:
     path = data_dir() / "version.json"
     try:
-        return str(json.loads(path.read_text(encoding="utf-8")).get("name", "dev"))
+        return str(json.loads(path.read_text(encoding="utf-8")).get("name", "0.0.1"))
     except (OSError, json.JSONDecodeError, TypeError):
-        return "dev"
+        return "0.0.1"
 
 
-def card_by_id(card_id: str) -> dict:
-    for card in load_cards():
-        if card["id"] == card_id:
-            return card
-    raise KeyError(card_id)
-
-
-def enemy_by_id(enemy_id: str) -> dict:
-    for enemy in load_enemies():
-        if enemy["id"] == enemy_id:
-            return enemy
-    raise KeyError(enemy_id)
+def action_by_id(action_id: str) -> dict:
+    for action in load_actions():
+        if action["id"] == action_id:
+            return action
+    raise KeyError(action_id)
 
 
 def reward_ids() -> list[str]:
-    return [card["id"] for card in load_cards() if not card.get("starter")]
+    return [action["id"] for action in load_actions() if action.get("reward")]
 
 
-def _check_effects(effects, where: str, errors: list[str]) -> None:
-    if not isinstance(effects, list):
-        errors.append(f"{where}: effects must be a list")
+def monster_by_id(monster_id: str) -> dict:
+    for monster in load_monsters():
+        if monster["id"] == monster_id:
+            return monster
+    raise KeyError(monster_id)
+
+
+def _check_ability(ability, where: str, errors: list[str]) -> None:
+    if not isinstance(ability, dict):
+        errors.append(f"{where}: ability must be an object")
         return
-    for index, effect in enumerate(effects):
-        op = effect.get("op")
-        label = f"{where} effect {index} ({op})"
-        if op not in KNOWN_OPS:
-            errors.append(f"{label}: unknown op")
-            continue
-        for key in REQUIRED_FIELDS.get(op, ()):
-            if key not in effect:
-                errors.append(f"{label}: missing {key}")
-        if op == "if_intent_attack":
-            _check_effects(effect.get("then", []), label, errors)
-        if op == "turn_start":
-            inner = effect.get("effect")
-            if not isinstance(inner, dict):
-                errors.append(f"{label}: missing effect")
-            else:
-                _check_effects([inner], label, errors)
+    if ability.get("type") not in ABILITY_TYPES:
+        errors.append(f"{where}: unknown ability {ability.get('type')!r}")
+    if not isinstance(ability.get("amount"), int) or ability.get("amount", 0) < 0:
+        errors.append(f"{where}: ability amount must be a non-negative integer")
+    if not ability.get("text"):
+        errors.append(f"{where}: ability needs text")
 
 
 def validate() -> list[str]:
     """Return structural problems in the JSON content. Empty means it is usable."""
     errors: list[str] = []
     try:
-        cards = load_cards()
-        enemies = load_enemies()
-        encounters = load_encounters()
+        actions = load_actions()
+        monsters = load_monsters()
+        gauntlet = load_gauntlet()
         hero = load_hero()
     except (OSError, json.JSONDecodeError, KeyError) as exc:
         return [f"could not load data: {exc}"]
 
-    ids: set[str] = set()
-    for card in cards:
+    action_ids: set[str] = set()
+    for action in actions:
+        aid = action.get("id", "")
+        if not aid or aid in action_ids:
+            errors.append(f"bad or duplicate action id {aid!r}")
+        action_ids.add(aid)
+        if action.get("type") not in ACTION_TYPES:
+            errors.append(f"{aid}: unknown action type")
+        if not all(key in action for key in ("name", "value", "text")):
+            errors.append(f"{aid}: needs name, value, and text")
+    if {action.get("type") for action in actions} != ACTION_TYPES:
+        errors.append("actions.json must define Strike, Defend, Heal, and Trap")
+    if len([action for action in actions if action.get("reward")]) < 3:
+        errors.append("actions.json needs at least 3 reward cards")
+
+    monster_ids: set[str] = set()
+    for monster in monsters:
+        mid = monster.get("id", "")
+        if not mid or mid in monster_ids:
+            errors.append(f"bad or duplicate monster id {mid!r}")
+        monster_ids.add(mid)
+        for key in ("species", "name", "hp", "capture", "attack", "defense", "ability"):
+            if key not in monster:
+                errors.append(f"{mid}: missing {key}")
+        capture = monster.get("capture")
+        if not isinstance(capture, list) or len(capture) != 2:
+            errors.append(f"{mid}: capture must be [min, max]")
+        elif not all(isinstance(value, int) for value in capture) or capture[0] < 0 or capture[1] < capture[0]:
+            errors.append(f"{mid}: invalid capture range")
+        _check_ability(monster.get("ability"), f"{mid} ability", errors)
+        evolve = monster.get("evolve")
+        if evolve is not None:
+            for key in ("name", "hp", "attack", "defense", "ability"):
+                if key not in evolve:
+                    errors.append(f"{mid} evolve: missing {key}")
+            _check_ability(evolve.get("ability"), f"{mid} evolved ability", errors)
+
+    encounter_ids: set[str] = set()
+    tiers = [0, 0, 0, 0]
+    for card in gauntlet:
         cid = card.get("id", "")
-        if not cid or cid in ids:
-            errors.append(f"bad or duplicate card id {cid!r}")
-        ids.add(cid)
-        if card.get("type") not in ("attack", "skill", "power"):
-            errors.append(f"{cid}: type must be attack, skill, or power")
-        if "name" not in card or "text" not in card or "cost" not in card:
-            errors.append(f"{cid}: needs name, text, and cost")
-        _check_effects(card.get("effects", []), cid or "card", errors)
+        if not cid or cid in encounter_ids:
+            errors.append(f"bad or duplicate gauntlet card id {cid!r}")
+        encounter_ids.add(cid)
+        if card.get("monster") not in monster_ids:
+            errors.append(f"{cid}: unknown monster {card.get('monster')!r}")
+        tier = card.get("tier")
+        if tier not in (1, 2, 3, 4):
+            errors.append(f"{cid}: tier must be 1, 2, 3, or 4")
+        else:
+            tiers[tier - 1] += 1
+    if len(gauntlet) != 30 or tiers != [10, 10, 9, 1]:
+        errors.append(f"gauntlet must contain tiers [10, 10, 9, 1], got {tiers}")
+    if not gauntlet or not gauntlet[-1].get("boss") or gauntlet[-1].get("tier") != 4:
+        errors.append("the final gauntlet card must be the Apex Boss")
 
-    enemy_ids: set[str] = set()
-    for enemy in enemies:
-        eid = enemy.get("id", "")
-        if not eid or eid in enemy_ids:
-            errors.append(f"bad or duplicate enemy id {eid!r}")
-        enemy_ids.add(eid)
-        pattern = enemy.get("pattern")
-        if not pattern:
-            errors.append(f"{eid}: needs a pattern")
-            continue
-        for index, step in enumerate(pattern):
-            kind = step.get("intent")
-            if kind not in KNOWN_INTENTS:
-                errors.append(f"{eid} pattern {index}: unknown intent {kind!r}")
-
-    if not encounters:
-        errors.append("encounters.json is empty")
-    for enc in encounters:
-        eid = enc.get("enemy")
-        if eid not in enemy_ids:
-            errors.append(f"encounter {enc.get('id', '?')}: unknown enemy {eid!r}")
-        gold = enc.get("gold")
-        if gold is not None and (not isinstance(gold, list) or len(gold) != 2):
-            errors.append(f"encounter {enc.get('id', '?')}: gold must be [min, max]")
-
-    for cid in hero.get("cards", []):
-        if cid not in ids:
-            errors.append(f"hero deck: unknown card {cid!r}")
-    for key in ("name", "title", "hp", "gold", "energy", "cards"):
+    for action_id in hero.get("actions", []):
+        if action_id not in action_ids:
+            errors.append(f"action deck: unknown action {action_id!r}")
+    if len(hero.get("actions", [])) != 20:
+        errors.append("hero action deck must contain exactly 20 cards")
+    if hero.get("starter") not in monster_ids:
+        errors.append("hero starter is not a known monster")
+    for key in ("name", "title", "starter", "actions"):
         if key not in hero:
             errors.append(f"hero.json missing {key}")
     return errors

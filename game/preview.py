@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import os
+import tempfile
 from pathlib import Path
 
 os.environ.setdefault("SDL_VIDEODRIVER", "dummy")
@@ -10,7 +11,8 @@ os.environ.setdefault("SDL_VIDEODRIVER", "dummy")
 import pygame
 
 from game.main import App
-from game.scenes import CombatScene, EndScene, RewardScene, ShopScene
+from game.arena_scenes import ArenaScene, EndScene, MenuScene, UpkeepScene
+from game.save import clear_save, set_save_file, write_checkpoint
 from game.settings import HEIGHT, WIDTH
 
 
@@ -24,6 +26,7 @@ def main() -> int:
     pygame.display.init()
     pygame.font.init()
     screen = pygame.display.set_mode((WIDTH, HEIGHT))
+    set_save_file(Path(tempfile.mkdtemp()) / "run.json")
     app = App(screen=screen)
     folder = Path("build") / "preview"
     folder.mkdir(parents=True, exist_ok=True)
@@ -33,24 +36,44 @@ def main() -> int:
     from game.run import Run
 
     run = Run(seed=1)
-    app.scene = CombatScene(app, run, run.make_combat())
+    app.scene = ArenaScene(app, run, run.make_combat())
     app.scene.update(0.016)
-    _save(app, "combat.png", folder)
+    _save(app, "arena.png", folder)
+
+    run.active[0].base_attack = 20
+    app.scene._commit_turn()
+    app.scene.update(0.22)
+    _save(app, "attack_animation.png", folder)
+    app.scene.animations.clear()
+
+    app.scene.pause.page = "menu"
+    _save(app, "pause_menu.png", folder)
+    app.scene.pause.page = "abandon"
+    _save(app, "abandon.png", folder)
+    app.scene.pause.page = "settings"
+    _save(app, "settings.png", folder)
+    app.scene.pause.page = None
 
     combat = app.scene.combat
-    combat.enemy.hp = 0
-    combat.outcome = "win"
+    combat.wild.hp = 0
+    combat.outcome = "killed"
     app.scene.update(0.016)
     _save(app, "victory_banner.png", folder)
 
-    app.scene = RewardScene(app, run, 24)
-    _save(app, "reward.png", folder)
+    run.resolve(combat)
+    app.scene = UpkeepScene(app, run)
+    _save(app, "upkeep.png", folder)
 
-    run.roll_shop()
-    app.scene = ShopScene(app, run)
-    _save(app, "shop.png", folder)
-
+    run.index = 30
     app.scene = EndScene(app, run, victory=True)
     _save(app, "ending.png", folder)
+
+    write_checkpoint(run, None, "upkeep")
+    app.scene = MenuScene(app)
+    _save(app, "menu_continue.png", folder)
+    app.scene.confirm_new = True
+    _save(app, "menu_confirm.png", folder)
+    clear_save()
+    set_save_file(None)
     print(f"wrote {folder}")
     return 0

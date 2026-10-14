@@ -1,12 +1,9 @@
 {
   "hand_size": 5,
-  "hand_limit": 10,
-  "shop_slots": 5,
-  "card_price": 55,
-  "remove_price": 75,
-  "heal_price": 40,
-  "heal_amount": 15,
-  "min_deck_size": 5,
-  "weak_multiplier": 0.75,
-  "vulnerable_multiplier": 1.5
+  "action_deck_size": 20,
+  "party_limit": 3,
+  "tier_sizes": [10, 10, 9, 1],
+  "capture_ratio": 0.4,
+  "xp_attack": 2,
+  "xp_hp": 3
 }

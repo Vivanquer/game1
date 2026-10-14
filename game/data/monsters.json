@@ -1,0 +1,107 @@
+[
+  {
+    "id": "scrapling", "species": "scrapling", "name": "Scrapling", "wild": false,
+    "hp": 10, "capture": [1, 3], "attack": 1, "defense": 1,
+    "color": [145, 150, 165],
+    "ability": {"type": "party_defense", "amount": 1, "text": "Loyal Guard: your party gains +1 Defense."},
+    "evolve": {
+      "name": "Ironmane", "hp": 15, "attack": 3, "defense": 3, "color": [180, 185, 205],
+      "ability": {"type": "party_defense", "amount": 2, "text": "Iron Guard: your party gains +2 Defense."}
+    }
+  },
+  {
+    "id": "ember_fox", "species": "ember_fox", "name": "Ember Fox", "hp": 8, "capture": [1, 2],
+    "attack": 2, "defense": 0, "color": [220, 104, 62],
+    "ability": {"type": "party_attack", "amount": 1, "text": "Kindle: your party gains +1 Attack."},
+    "evolve": {
+      "name": "Solar Vixen", "hp": 14, "attack": 5, "defense": 1, "color": [245, 150, 62],
+      "ability": {"type": "party_attack", "amount": 2, "text": "Wildfire: your party gains +2 Attack."}
+    }
+  },
+  {
+    "id": "moss_pup", "species": "moss_pup", "name": "Moss Pup", "hp": 10, "capture": [2, 3],
+    "attack": 1, "defense": 2, "color": [92, 158, 88],
+    "ability": {"type": "turn_heal", "amount": 1, "text": "Regrowth: heal the frontliner 1 HP each turn."},
+    "evolve": {
+      "name": "Verdant Hound", "hp": 17, "attack": 3, "defense": 3, "color": [72, 188, 102],
+      "ability": {"type": "turn_heal", "amount": 2, "text": "Bloom: heal the frontliner 2 HP each turn."}
+    }
+  },
+  {
+    "id": "tide_finch", "species": "tide_finch", "name": "Tide Finch", "hp": 7, "capture": [1, 2],
+    "attack": 1, "defense": 1, "color": [72, 146, 210],
+    "ability": {"type": "draw_bonus", "amount": 1, "text": "Tailwind: draw 1 extra Action each turn."},
+    "evolve": {
+      "name": "Tempest Roc", "hp": 13, "attack": 4, "defense": 2, "color": [92, 186, 235],
+      "ability": {"type": "draw_bonus", "amount": 2, "text": "Gale: draw 2 extra Actions each turn."}
+    }
+  },
+  {
+    "id": "stone_cub", "species": "stone_cub", "name": "Stone Cub", "hp": 12, "capture": [2, 4],
+    "attack": 1, "defense": 3, "color": [142, 128, 112],
+    "ability": {"type": "party_defense", "amount": 1, "text": "Granite Hide: your party gains +1 Defense."},
+    "evolve": {
+      "name": "Quake Bear", "hp": 20, "attack": 4, "defense": 5, "color": [174, 150, 118],
+      "ability": {"type": "party_defense", "amount": 3, "text": "Living Wall: your party gains +3 Defense."}
+    }
+  },
+  {
+    "id": "spark_hare", "species": "spark_hare", "name": "Spark Hare", "hp": 9, "capture": [1, 3],
+    "attack": 2, "defense": 1, "color": [224, 196, 72],
+    "ability": {"type": "pierce", "amount": 1, "text": "Static Fang: ignore 1 wild Defense."},
+    "evolve": {
+      "name": "Thunder Jack", "hp": 15, "attack": 5, "defense": 2, "color": [246, 218, 86],
+      "ability": {"type": "pierce", "amount": 3, "text": "Lightning Fang: ignore 3 wild Defense."}
+    }
+  },
+  {
+    "id": "gloom_moth", "species": "gloom_moth", "name": "Gloom Moth", "hp": 20, "capture": [2, 4],
+    "attack": 6, "defense": 2, "color": [130, 88, 168],
+    "ability": {"type": "pierce", "amount": 2, "text": "Dust Veil: 2 damage ignores Block."}
+  },
+  {
+    "id": "razor_boar", "species": "razor_boar", "name": "Razor Boar", "hp": 23, "capture": [3, 5],
+    "attack": 7, "defense": 2, "color": [164, 82, 72],
+    "ability": {"type": "rage", "amount": 3, "text": "Enraged: +3 Attack below half HP."}
+  },
+  {
+    "id": "crystal_toad", "species": "crystal_toad", "name": "Crystal Toad", "hp": 24, "capture": [2, 5],
+    "attack": 5, "defense": 4, "color": [92, 184, 178],
+    "ability": {"type": "party_defense", "amount": 2, "text": "Prism Skin: your party gains +2 Defense."}
+  },
+  {
+    "id": "dune_serpent", "species": "dune_serpent", "name": "Dune Serpent", "hp": 19, "capture": [1, 4],
+    "attack": 8, "defense": 1, "color": [210, 166, 82],
+    "ability": {"type": "pierce", "amount": 3, "text": "Burrow Strike: 3 damage ignores Block."}
+  },
+  {
+    "id": "frost_elk", "species": "frost_elk", "name": "Frost Elk", "hp": 25, "capture": [3, 6],
+    "attack": 6, "defense": 4, "color": [142, 194, 220],
+    "ability": {"type": "turn_heal", "amount": 2, "text": "Winter Calm: heal the frontliner 2 HP each turn."}
+  },
+  {
+    "id": "iron_wyvern", "species": "iron_wyvern", "name": "Iron Wyvern", "hp": 28, "capture": [2, 5],
+    "attack": 8, "defense": 5, "color": [118, 128, 150],
+    "ability": {"type": "party_attack", "amount": 2, "text": "War Cry: your party gains +2 Attack."}
+  },
+  {
+    "id": "void_lynx", "species": "void_lynx", "name": "Void Lynx", "hp": 21, "capture": [1, 3],
+    "attack": 9, "defense": 2, "color": [94, 70, 142],
+    "ability": {"type": "draw_bonus", "amount": 1, "text": "Foresight: draw 1 extra Action each turn."}
+  },
+  {
+    "id": "sunscale", "species": "sunscale", "name": "Sunscale", "hp": 26, "capture": [3, 5],
+    "attack": 7, "defense": 4, "color": [230, 148, 64],
+    "ability": {"type": "party_attack", "amount": 2, "text": "Radiance: your party gains +2 Attack."}
+  },
+  {
+    "id": "grave_owl", "species": "grave_owl", "name": "Grave Owl", "hp": 22, "capture": [2, 4],
+    "attack": 8, "defense": 3, "color": [116, 110, 138],
+    "ability": {"type": "pierce", "amount": 2, "text": "Death Gaze: ignore 2 wild Defense."}
+  },
+  {
+    "id": "apex_chimera", "species": "apex_chimera", "name": "The Apex Chimera", "hp": 42,
+    "capture": [0, 0], "attack": 11, "defense": 5, "color": [204, 72, 82],
+    "ability": {"type": "rage", "amount": 4, "text": "Apex Fury: +4 Attack below half HP."}
+  }
+]

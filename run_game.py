@@ -1,10 +1,11 @@
 """Launch the game.
 
 Every run from source packages a new exe and starts it:
-    .venv\\Scripts\\python.exe run_game.py
+    .\\.venv\\Scripts\\python.exe run_game.py
 
-The first run writes versions\\v1\\Wayfarer.exe.
-The next run writes versions\\v2\\Wayfarer.exe, then v3, and so on.
+The first development build writes versions\\0.0.1\\BeastboundArena.exe.
+The next update writes versions\\0.0.2\\BeastboundArena.exe, then 0.0.3, and so on.
+Alpha starts at 0.1.0. Open beta starts at 1.0.0.
 Older versions stay in the versions folder.
 """
 
@@ -71,7 +72,7 @@ def main() -> None:
             sys.path.insert(0, str(root))
 
     if "--smoke" in sys.argv:
-        from game.smoke import main as smoke_main
+        from game.arena_smoke import main as smoke_main
 
         raise SystemExit(smoke_main())
     if "--preview" in sys.argv:

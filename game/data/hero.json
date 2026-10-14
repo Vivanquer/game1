@@ -1,20 +1,12 @@
 {
-  "name": "Wayfarer",
-  "title": "Wayfarer",
-  "subtitle": "A card RPG",
-  "hp": 70,
-  "gold": 45,
-  "energy": 3,
-  "cards": [
-    "strike",
-    "strike",
-    "strike",
-    "strike",
-    "strike",
-    "guard",
-    "guard",
-    "guard",
-    "guard",
-    "crush"
+  "name": "Beastbinder",
+  "title": "Beastbound Arena",
+  "subtitle": "Capture. Evolve. Survive the Gauntlet.",
+  "starter": "scrapling",
+  "actions": [
+    "strike", "strike", "strike", "strike", "strike", "strike", "strike",
+    "defend", "defend", "defend", "defend", "defend", "defend",
+    "heal", "heal", "heal", "heal",
+    "trap", "trap", "trap"
   ]
 }

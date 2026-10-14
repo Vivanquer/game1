@@ -4,8 +4,9 @@ from __future__ import annotations
 
 import pygame
 
+from game.arena_scenes import ArenaScene, MenuScene, UpkeepScene
 from game.content import game_version, load_hero
-from game.scenes import MenuScene
+from game.save import write_checkpoint
 from game.settings import FPS, HEIGHT, WIDTH
 from game.ui import Art, Fonts
 
@@ -22,7 +23,7 @@ class App:
         self.fonts = Fonts()
         self.art = Art()
         self.fullscreen = False
-        title = load_hero().get("title", "Wayfarer")
+        title = load_hero().get("title", "Beastbound Arena")
         pygame.display.set_caption(f"{title}  ·  {game_version()}")
         self.scene = MenuScene(self)
 
@@ -33,23 +34,36 @@ class App:
         self.screen = pygame.display.set_mode((WIDTH, HEIGHT), flags)
         self.fullscreen = enabled
 
+    def _keep_open_run(self) -> None:
+        scene = self.scene
+        try:
+            if isinstance(scene, ArenaScene):
+                write_checkpoint(scene.run, scene.combat, "combat")
+            elif isinstance(scene, UpkeepScene):
+                write_checkpoint(scene.run, None, "upkeep")
+        except OSError:
+            return
+
     def run(self) -> None:
         clock = pygame.time.Clock()
-        while self.running:
-            dt = clock.tick(FPS) / 1000
-            self.time += dt
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    self.running = False
+        try:
+            while self.running:
+                dt = clock.tick(FPS) / 1000
+                self.time += dt
+                for event in pygame.event.get():
+                    if event.type == pygame.QUIT:
+                        self.running = False
+                        break
+                    self.scene.handle(event)
+                if not self.running:
                     break
-                self.scene.handle(event)
-            if not self.running:
-                break
-            self.scene.update(dt)
-            self.scene.draw(self.screen)
-            pygame.display.flip()
-        pygame.display.quit()
-        pygame.quit()
+                self.scene.update(dt)
+                self.scene.draw(self.screen)
+                pygame.display.flip()
+        finally:
+            self._keep_open_run()
+            pygame.display.quit()
+            pygame.quit()
 
 
 def main() -> None:

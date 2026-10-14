@@ -9,3 +9,4 @@ versions/
 error.log
 smoke_result.txt
 boot_ok.txt
+saves/

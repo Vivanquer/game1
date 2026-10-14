@@ -1,0 +1,12 @@
+[
+  {"id": "strike", "name": "Strike", "type": "strike", "value": 2, "text": "Another swing. Hits harder as your sent Attack grows."},
+  {"id": "defend", "name": "Defend", "type": "defend", "value": 2, "text": "Add 2 Block for the tank."},
+  {"id": "heal", "name": "Heal", "type": "heal", "value": 2, "text": "Restore 2 HP to the tank."},
+  {"id": "trap", "name": "Trap", "type": "trap", "value": 0, "text": "Catch it if this blow reaches the capture line."},
+  {"id": "rally", "name": "Rally", "type": "strike", "value": 2, "pack_attack": 2, "reward": true, "text": "Strike. Your sent beasts gain +2 Attack."},
+  {"id": "war_drum", "name": "War Drum", "type": "strike", "value": 2, "pack_attack": 4, "reward": true, "text": "Strike. Your sent beasts gain +4 Attack."},
+  {"id": "fang", "name": "Fang", "type": "strike", "value": 2, "pierce": 3, "reward": true, "text": "Strike that ignores 3 Defense."},
+  {"id": "snare", "name": "Snare", "type": "trap", "value": 0, "capture_bonus": 3, "reward": true, "text": "Trap. Raise the capture line by 3."},
+  {"id": "field_mend", "name": "Field Mend", "type": "heal", "value": 3, "heal_all": true, "reward": true, "text": "Heal every living beast 3 HP."},
+  {"id": "pack_guard", "name": "Pack Guard", "type": "defend", "value": 5, "reward": true, "text": "Add 5 Block for the tank."}
+]
